@@ -74,13 +74,55 @@
  *   const boundFn = fixWithBind(cart);         // properly bound sellItem
  */
 export function createSamosaCart(ownerName, location) {
-  // Your code here
+  return {
+    owner: ownerName,
+    location,
+    menu: { samosa: 15, jalebi: 20, kachori: 25 },
+    sales: [],
+
+    sellItem(itemName, quantity) {
+      if (!Object.hasOwn(this.menu, itemName)) return -1;
+      if (typeof quantity !== "number" || !(quantity > 0)) return -1;
+
+      const total = this.menu[itemName] * quantity;
+      this.sales.push({ item: itemName, quantity, total });
+      return total;
+    },
+
+    getDailySales() {
+      return this.sales.reduce((sum, sale) => sum + sale.total, 0);
+    },
+
+    getPopularItem() {
+      if (this.sales.length === 0) return null;
+
+      const quantities = {};
+      for (const sale of this.sales) {
+        quantities[sale.item] = (quantities[sale.item] || 0) + sale.quantity;
+      }
+
+      return Object.keys(quantities).reduce((best, item) =>
+        quantities[item] > quantities[best] ? item : best
+      );
+    },
+
+    moveTo(newLocation) {
+      this.location = newLocation;
+      return `${this.owner} ka cart ab ${newLocation} pe hai!`;
+    },
+
+    resetDay() {
+      this.sales = [];
+      return `${this.owner} ka naya din shuru!`;
+    },
+  };
 }
 
 export function demonstrateThisLoss(cart) {
-  // Your code here
+  const { sellItem } = cart;
+  return sellItem;
 }
 
 export function fixWithBind(cart) {
-  // Your code here
+  return cart.sellItem.bind(cart);
 }

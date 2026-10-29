@@ -127,82 +127,148 @@
  *   hardik.getProfile();
  *   // => { ..., role: "allrounder", totalRuns: 71, totalWickets: 2, ... }
  */
+const recordInnings = (innings, runs, balls) => {
+  if (typeof runs !== "number" || typeof balls !== "number") return null;
+  if (!(runs >= 0) || !(balls > 0)) return null;
+
+  const entry = { runs, balls, strikeRate: (runs / balls) * 100 };
+  innings.push(entry);
+  return entry;
+};
+
+const recordSpell = (spells, wickets, runsConceded, overs) => {
+  if (typeof wickets !== "number" || typeof runsConceded !== "number" || typeof overs !== "number") {
+    return null;
+  }
+  if (!(wickets >= 0) || !(runsConceded >= 0) || !(overs > 0)) return null;
+
+  const entry = { wickets, runsConceded, overs, economy: runsConceded / overs };
+  spells.push(entry);
+  return entry;
+};
+
+const average = (list, key) =>
+  list.length === 0 ? 0 : list.reduce((sum, item) => sum + item[key], 0) / list.length;
+
+const sum = (list, key) => list.reduce((total, item) => total + item[key], 0);
+
 export class Player {
   constructor(name, age, team) {
-    // Your code here
+    this.name = name;
+    this.age = age;
+    this.team = team;
+    this.trainingHours = 0;
   }
 
   getProfile() {
-    // Your code here
+    return {
+      name: this.name,
+      age: this.age,
+      team: this.team,
+      role: "player",
+      trainingHours: this.trainingHours,
+    };
   }
 
   train(hours) {
-    // Your code here
+    if (typeof hours !== "number" || !(hours > 0)) return -1;
+
+    this.trainingHours += hours;
+    return this.trainingHours;
   }
 
   getTrainingHours() {
-    // Your code here
+    return this.trainingHours;
   }
 }
 
 export class Batsman extends Player {
   constructor(name, age, team, battingStyle) {
-    // Your code here
+    super(name, age, team);
+    this.battingStyle = battingStyle;
+    this.innings = [];
   }
 
   playInnings(runs, balls) {
-    // Your code here
+    return recordInnings(this.innings, runs, balls);
   }
 
   getStrikeRate() {
-    // Your code here
+    return average(this.innings, "strikeRate");
   }
 
   getProfile() {
-    // Your code here
+    return {
+      ...super.getProfile(),
+      battingStyle: this.battingStyle,
+      role: "batsman",
+      totalRuns: sum(this.innings, "runs"),
+      inningsPlayed: this.innings.length,
+    };
   }
 }
 
 export class Bowler extends Player {
   constructor(name, age, team, bowlingStyle) {
-    // Your code here
+    super(name, age, team);
+    this.bowlingStyle = bowlingStyle;
+    this.spells = [];
   }
 
   bowlSpell(wickets, runsConceded, overs) {
-    // Your code here
+    return recordSpell(this.spells, wickets, runsConceded, overs);
   }
 
   getEconomy() {
-    // Your code here
+    return average(this.spells, "economy");
   }
 
   getProfile() {
-    // Your code here
+    return {
+      ...super.getProfile(),
+      bowlingStyle: this.bowlingStyle,
+      role: "bowler",
+      totalWickets: sum(this.spells, "wickets"),
+      spellsBowled: this.spells.length,
+    };
   }
 }
 
 export class AllRounder extends Player {
   constructor(name, age, team, battingStyle, bowlingStyle) {
-    // Your code here
+    super(name, age, team);
+    this.battingStyle = battingStyle;
+    this.bowlingStyle = bowlingStyle;
+    this.innings = [];
+    this.spells = [];
   }
 
   playInnings(runs, balls) {
-    // Your code here
+    return recordInnings(this.innings, runs, balls);
   }
 
   bowlSpell(wickets, runsConceded, overs) {
-    // Your code here
+    return recordSpell(this.spells, wickets, runsConceded, overs);
   }
 
   getStrikeRate() {
-    // Your code here
+    return average(this.innings, "strikeRate");
   }
 
   getEconomy() {
-    // Your code here
+    return average(this.spells, "economy");
   }
 
   getProfile() {
-    // Your code here
+    return {
+      ...super.getProfile(),
+      battingStyle: this.battingStyle,
+      bowlingStyle: this.bowlingStyle,
+      role: "allrounder",
+      totalRuns: sum(this.innings, "runs"),
+      totalWickets: sum(this.spells, "wickets"),
+      inningsPlayed: this.innings.length,
+      spellsBowled: this.spells.length,
+    };
   }
 }
